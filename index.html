@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free File to ZIP Converter Online | SuqMall - No Limits, 100% Secure</title>
+    <meta name="description" content="SuqMall's free File to ZIP Converter lets you compress any files into ZIP archives with no limits. No registration, 100% secure, and works entirely in your browser.">
+    <meta name="keywords" content="file to zip, zip converter, free zip tool, compress files, online zip converter, suqmall, file compression">
+    <meta name="author" content="SuqMall">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary: #4e54c8;
+            --primary-dark: #3f43a7;
+            --secondary: #8f94fb;
+            --accent: #38a169;
+            --accent-dark: #2f855a;
+            --text: #2d3748;
+            --light: #f8f9fa;
+            --dark: #1a202c;
+            --gray: #718096;
+            --light-gray: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 2rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        .tool-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .tool-header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .tool-header h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .tool-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .upload-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-box {
+            border: 3px dashed var(--primary);
+            border-radius: 15px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-box:hover, .upload-box.dragover {
+            background: #eef0ff;
+            border-color: var(--primary-dark);
+            transform: translateY(-5px);
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+        
+        .browse-btn {
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .browse-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-list {
+            margin: 25px 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--light);
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-icon {
+            color: var(--accent);
+            font-size: 20px;
+        }
+        
+        .remove-btn {
+            color: #e53e3e;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 18px;
+        }
+        
+        .progress-container {
+            margin: 30px 0;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: var(--light-gray);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .convert-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .convert-btn:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+        
+        .convert-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .download-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            display: none;
+        }
+        
+        .download-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-3px);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 30px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .privacy-note {
+            background: #ebf8ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .privacy-icon {
+            font-size: 24px;
+            color: #3182ce;
+        }
+        
+        .upload-animation {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .upload-animation.visible {
+            opacity: 1;
+        }
+        
+        .circle {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 4;
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            animation: draw 1.5s infinite;
+            transform-origin: center;
+        }
+        
+        @keyframes draw {
+            0% {
+                stroke-dashoffset: 283;
+                transform: rotate(0deg);
+            }
+            50% {
+                stroke-dashoffset: 0;
+            }
+            100% {
+                stroke-dashoffset: -283;
+                transform: rotate(360deg);
+            }
+        }
+        
+        .success-checkmark {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            animation: scaleUp 0.5s ease;
+        }
+        
+        @keyframes scaleUp {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 5;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            margin: 0 auto;
+            box-shadow: 0 0 0 var(--accent);
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 5;
+            stroke-miterlimit: 10;
+            stroke: var(--accent);
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+        
+        @keyframes fill {
+            100% {
+                box-shadow: 0 0 0 30px rgba(56, 161, 105, 0) inset;
+            }
+        }
+        
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .content-section h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 10px;
+        }
+        
+        .blog-post {
+            margin-bottom: 25px;
+        }
+        
+        .blog-post h3 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 20px;
+        }
+        
+        .faq-question {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: var(--gray);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .social-icons a {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tool-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+        
+        .schema-data {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-archive logo-icon"></i>
+                <h1>SuqMall</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#tool">Tool</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <div class="tool-container" id="tool">
+            <div class="tool-header">
+                <h2>File to ZIP Converter</h2>
+                <p>Convert any files to ZIP format - 100% Free, Unlimited, No Registration Required</p>
+            </div>
+            
+            <div class="main-content">
+                <div class="upload-container">
+                    <div class="upload-box" id="uploadBox">
+                        <i class="fas fa-file-archive upload-icon"></i>
+                        <p class="upload-text">Drag & Drop your files here</p>
+                        <p class="upload-text">OR</p>
+                        <button class="browse-btn">Browse Files</button>
+                        <input type="file" class="file-input" id="fileInput" multiple>
+                        
+                        <svg class="upload-animation" viewBox="0 0 100 100" id="uploadAnimation">
+                            <circle class="circle" cx="50" cy="50" r="45" />
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="file-list" id="fileList">
+                    <!-- Files will be listed here -->
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>Conversion Progress</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" id="progressBar"></div>
+                    </div>
+                </div>
+                
+                <div class="success-checkmark" id="successCheckmark">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                    <p style="margin-top: 15px; font-weight: 600; color: var(--accent);">Conversion Complete!</p>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn convert-btn" id="convertBtn" disabled>
+                        <i class="fas fa-layer-group"></i> Convert to ZIP
+                    </button>
+                    <button class="action-btn download-btn" id="downloadBtn">
+                        <i class="fas fa-download"></i> Download ZIP
+                    </button>
+                </div>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-lock feature-icon"></i>
+                        <h3>100% Secure</h3>
+                        <p>Files stay on your device - no server uploads</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-infinity feature-icon"></i>
+                        <h3>Unlimited Files</h3>
+                        <p>No restrictions on file type or size</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-bolt feature-icon"></i>
+                        <h3>Fast Processing</h3>
+                        <p>Quick compression technology</p>
+                    </div>
+                </div>
+                
+                <div class="privacy-note">
+                    <i class="fas fa-shield-alt privacy-icon"></i>
+                    <div>
+                        <h3>Privacy Guaranteed</h3>
+                        <p>Your files are processed entirely in your browser. They are never uploaded to any server, ensuring complete privacy and security.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-section" id="blog">
+            <h2>Blog: Benefits of Using SuqMall's File to ZIP Converter</h2>
+            
+            <div class="blog-post">
+                <h3>1. Efficient File Organization</h3>
+                <p>Our File to ZIP Converter helps you organize multiple files into a single, compressed archive. This is especially useful when you need to send numerous files via email or messaging apps that have attachment limitations. By compressing your files into a ZIP archive, you can maintain folder structures and reduce the overall file size for easier transfer.</p>
+            </div>
+            
+            <div class="blog-post">
+                <h3>2. No File Type Restrictions</h3>
+                <p>Unlike many other online tools that limit the types of files you can compress, SuqMall's converter accepts any file format. Whether you need to compress documents, images, videos, audio files, or even software applications, our tool handles them all without discrimination.</p>
+            </div>
+            
+            <div class="blog-post">
+                <h3>3. Enhanced Security</h3>
+                <p>Since all processing happens locally in your browser, your files never leave your computer. This ensures that sensitive documents remain private and secure. There's no risk of your files being intercepted during upload or stored on unknown servers.</p>
+            </div>
+            
+            <div class="blog-post">
+                <h3>4. Completely Free with No Limits</h3>
+                <p>Many similar tools impose restrictions on file size, number of files, or require payment for full functionality. SuqMall's converter is 100% free with no hidden limits. You can convert as many files as you need without worrying about subscription fees or usage caps.</p>
+            </div>
+            
+            <div class="blog-post">
+                <h3>5. User-Friendly Interface</h3>
+                <p>We've designed our tool with user experience in mind. The simple drag-and-drop interface makes it easy for anyone to use, regardless of technical expertise. Clear progress indicators keep you informed throughout the conversion process.</p>
+            </div>
+        </div>
+        
+        <div class="content-section" id="faq">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">What types of files can I convert to ZIP? <i class="fas fa-chevron-down"></i></div>
+                <div class="faq-answer">You can convert any type of file to ZIP format using our tool. There are no restrictions on file types - documents, images, videos, audio files, applications, and more are all supported.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Is there a limit to the number or size of files I can convert? <i class="fas fa-chevron-down"></i></div>
+                <div class="faq-answer">No, there are no limits. You can convert as many files as you want, and there are no restrictions on individual file sizes or the total size of your conversion.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How secure is my data when using this tool? <i class="fas fa-chevron-down"></i></div>
+                <div class="faq-answer">Your data is 100% secure. All file processing happens directly in your browser - your files are never uploaded to any server. This means your sensitive documents remain private and on your computer throughout the entire process.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Do I need to create an account to use this tool? <i class="fas fa-chevron-down"></i></div>
+                <div class="faq-answer">No, our tool is completely free to use without any registration or account creation. Just visit the page and start converting your files immediately.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Will the quality of my files be affected by compression? <i class="fas fa-chevron-down"></i></div>
+                <div class="faq-answer">ZIP compression is lossless, which means your original files will be preserved exactly as they were when extracted from the ZIP archive. The compression reduces file size without affecting quality.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I use this tool on mobile devices? <i class="fas fa-chevron-down"></i></div>
+                <div class="faq-answer">Yes, our tool is fully responsive and works on all devices including smartphones and tablets. The interface adjusts to provide an optimal experience regardless of screen size.</div>
+            </div>
+        </div>
+        
+        <footer id="contact">
+            <div class="logo">
+                <i class="fas fa-archive logo-icon"></i>
+                <h2>SuqMall</h2>
+            </div>
+            <p>Providing free, unlimited file conversion tools since 2023</p>
+            
+            <div class="footer-links">
+                <a href="#">Home</a>
+                <a href="#tool">Tool</a>
+                <a href="#blog">Blog</a>
+                <a href="#faq">FAQ</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#contact">Contact</a>
+            </div>
+            
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            
+            <p>&copy; 2023 SuqMall. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Schema.org structured data for SEO -->
+    <script type="application/ld+json" class="schema-data">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "File to ZIP Converter",
+      "url": "https://suqmall.com/file-to-zip",
+      "description": "Free online tool to convert any files to ZIP format with no limits on file type, size, or quantity.",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "SuqMall"
+      }
+    }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadBox = document.getElementById('uploadBox');
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const convertBtn = document.getElementById('convertBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const uploadAnimation = document.getElementById('uploadAnimation');
+            const successCheckmark = document.getElementById('successCheckmark');
+            
+            let files = [];
+            let zip = null;
+            
+            // Upload box click handler
+            uploadBox.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // File input change handler
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadBox.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadBox.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadBox.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                uploadBox.classList.add('dragover');
+            }
+            
+            function unhighlight() {
+                uploadBox.classList.remove('dragover');
+            }
+            
+            uploadBox.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const droppedFiles = dt.files;
+                handleFiles(droppedFiles);
+            }
+            
+            function handleFileSelect(e) {
+                const selectedFiles = e.target.files;
+                handleFiles(selectedFiles);
+            }
+            
+            function handleFiles(fileList) {
+                for (let i = 0; i < fileList.length; i++) {
+                    files.push(fileList[i]);
+                    displayFile(fileList[i]);
+                }
+                
+                if (files.length > 0) {
+                    convertBtn.disabled = false;
+                }
+            }
+            
+            function displayFile(file) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas fa-file file-icon"></i>
+                        <span>${file.name} (${formatFileSize(file.size)})</span>
+                    </div>
+                    <button class="remove-btn" data-filename="${file.name}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                fileList.appendChild(fileItem);
+                
+                // Add event listener to remove button
+                const removeBtn = fileItem.querySelector('.remove-btn');
+                removeBtn.addEventListener('click', function() {
+                    const filename = this.getAttribute('data-filename');
+                    files = files.filter(f => f.name !== filename);
+                    fileItem.remove();
+                    
+                    if (files.length === 0) {
+                        convertBtn.disabled = true;
+                    }
+                });
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' bytes';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                else return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+            
+            // Convert button handler
+            convertBtn.addEventListener('click', async function() {
+                if (files.length === 0) return;
+                
+                // Show upload animation
+                uploadAnimation.classList.add('visible');
+                convertBtn.disabled = true;
+                
+                // Create a new JSZip instance
+                zip = new JSZip();
+                
+                // Simulate conversion process
+                let progress = 0;
+                const totalFiles = files.length;
+                
+                for (let i = 0; i < totalFiles; i++) {
+                    const file = files[i];
+                    
+                    // Update progress
+                    progress = Math.floor(((i + 1) / totalFiles) * 100);
+                    progressBar.style.width = `${progress}%`;
+                    progressPercent.textContent = `${progress}%`;
+                    
+                    // Add file to zip
+                    zip.file(file.name, file);
+                    
+                    // Small delay to visualize progress
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                
+                // Complete progress
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+                
+                // Hide upload animation
+                uploadAnimation.classList.remove('visible');
+                
+                // Show success animation
+                successCheckmark.style.display = 'block';
+                
+                // Show download button
+                downloadBtn.style.display = 'flex';
+                
+                // Hide convert button
+                convertBtn.style.display = 'none';
+            });
+            
+            // Download button handler
+            downloadBtn.addEventListener('click', function() {
+                if (!zip) return;
+                
+                // Generate the zip file
+                zip.generateAsync({type: "blob"})
+                .then(function(content) {
+                    // Create download link
+                    const downloadUrl = URL.createObjectURL(content);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = 'suqmall_files.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    // Clean up
+                    URL.revokeObjectURL(downloadUrl);
+                })
+                .catch(function(error) {
+                    console.error('Error creating ZIP file:', error);
+                    alert('Error creating ZIP file. Please try again.');
+                });
+            });
+            
+            // FAQ accordion functionality
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', () => {
+                    const answer = question.nextElementSibling;
+                    const isVisible = answer.style.display === 'block';
+                    
+                    // Close all answers
+                    document.querySelectorAll('.faq-answer').forEach(ans => {
+                        ans.style.display = 'none';
+                    });
+                    
+                    // Reset all icons
+                    document.querySelectorAll('.faq-question i').forEach(icon => {
+                        icon.className = 'fas fa-chevron-down';
+                    });
+                    
+                    // Open this answer if it wasn't already visible
+                    if (!isVisible) {
+                        answer.style.display = 'block';
+                        question.querySelector('i').className = 'fas fa-chevron-up';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
